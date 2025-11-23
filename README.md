@@ -5,13 +5,14 @@ given:
 
 - measured S21 data files (.s2p) for the phase shifters at each control voltage. 
 - desired beam steering angle
+- working frequency
+- elemnents separation in the phased array
 - number of columns (default: 6)
 
-The algorithm generates a phase-voltage lookup table and then chooses the best vector of phase values that achieves the closest possible
-inter-column phase progression. It includes:
+The algorithm generates a phase-voltage data table for the phase shifters at the given frequency and then chooses the best vector of voltage values that achieves the closest possible inter-column phase progression. It includes:
 
 - robust phase unwrapping
-- selection of the best phase vector from the lookup table
+- selection of the best phase vector from the phase shifter data
 - proper fallback for case of large phase margins
 
 ### Features
@@ -34,7 +35,7 @@ This step:
 
 Command:
 
-    python process_s2p_files.py --path ./S2P_files --freq 5.8e9 --out PSH_table.npy
+    python process_s2p_files.py --path rawdata --freq 5.8e9 --out PSH_table
 
 Output:
 
@@ -43,7 +44,7 @@ Output:
 
 ### 2. Generate the beam-steering lookup table (LUT)
 
-This step uses the previously generated PSH_table.npy.
+This step uses the previously generated PSH_table.npy, along with the output range of beam angles, and elements separation in terms of wavelength.
 
 The LUT generator:
 - Computes the required phase for each desired range of beam angles
@@ -52,7 +53,7 @@ The LUT generator:
 
 Command:
 
-    python generate_LookUpTable.py --phase-data PSH_table.npy --angles angles.txt --out LookupTable.csv
+    python generate_LUT.py --psh PSH_table.npy --out LookupTable.csv --theta 0 45 5 --dlambda 0.638
 
 Output format:
 
@@ -67,4 +68,8 @@ Example entry:
 ### 3. Integration
 
 Use the generated LookupTable.csv as the command table for the MCU/FPGA driving the 6-element phase-shifter array.
+
+### 4. Optional
+
+If the input of the phased array is a feeding from another receiving array, the incidence angle to that array must be used in the inputs (set to 0 by default). 
 
