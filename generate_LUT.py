@@ -69,7 +69,8 @@ def select_phases(phases, beta, N, debug=False):
     return best_candidate
 
 
-def generate_lookup_table(psh_file, out_file, theta_out_range=(0, 45, 5), d_lambda=0.638, debug=False):
+def generate_lookup_table(psh_file, out_file, theta_out_range=(0, 45, 5),
+                          d_lambda=0.638, theta_in_value=0, debug=False):
     # Load phase-shifter data
     PSH_data = np.array(np.load(psh_file))
     voltages = PSH_data[:, 0]
@@ -81,13 +82,14 @@ def generate_lookup_table(psh_file, out_file, theta_out_range=(0, 45, 5), d_lamb
     voltages = voltages[sort_indices]
 
     # Beam angles
-    theta_in_ticks = [0]  # can be extended
+    theta_in_ticks = [theta_in_value]  # user-defined or default input angle
     theta_out_ticks = np.arange(*theta_out_range)
 
     theta_in, theta_out = np.meshgrid(theta_in_ticks, theta_out_ticks)
     theta_in_vec = theta_in.flatten(order="F")
     theta_out_vec = theta_out.flatten(order="F")
 
+    # Beta calculation
     beta = 360 * d_lambda * (np.sin(np.deg2rad(theta_in_vec)) - np.sin(np.deg2rad(theta_out_vec)))
 
     N = len(beta)
@@ -117,9 +119,13 @@ if __name__ == "__main__":
     parser.add_argument("--out", "-o", type=str, default="LookupTable.csv", help="Output CSV file")
     parser.add_argument("--theta", "-t", type=float, nargs=3, default=[0, 45, 5],
                         help="Theta_out range: start stop step (deg), e.g., 0 45 5")
+    parser.add_argument("--theta_in", "-ti", type=float, default=0,
+                        help="Input (incidence) angle in degrees for feeding array, default=0")
     parser.add_argument("--dlambda", "-d", type=float, default=0.638, help="d/lambda ratio")
     parser.add_argument("--debug", action="store_true", help="Enable debug printing")
     args = parser.parse_args()
 
-    generate_lookup_table(args.psh, args.out, theta_out_range=args.theta, d_lambda=args.dlambda, debug=args.debug)
+    generate_lookup_table(args.psh, args.out, theta_out_range=args.theta,
+                          d_lambda=args.dlambda, theta_in_value=args.theta_in,
+                          debug=args.debug)
 
