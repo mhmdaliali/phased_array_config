@@ -53,7 +53,9 @@ The LUT generator:
 
 Command:
 
-    python generate_LUT.py --psh PSH_table.npy --out LookupTable.csv --theta 0 45 5 --dlambda 0.638
+    python generate_LUT.py --psh PSH_table.npy --out LookupTable.csv --theta 0 45 5 --dlambda 0.638  # Default incidence angle 0, the feed is by a generator
+    python generate_LUT.py --psh PSH_table.npy --out LookupTable.csv --theta_in 10 --theta 0 45 5 --dlambda 0.638  # Incidence angle 10, the feed is a receiving array
+
 
 Output format:
 
